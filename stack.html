@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>3D Stack Visualizer</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  overflow:hidden;
+  background: radial-gradient(circle at top,#0f2027,#203a43,#2c5364);
+  color:white;
+}
+
+h1{
+  text-align:center;
+  margin:10px 0;
+  color:#00e5ff;
+}
+
+/* BACK BUTTON */
+#backBtn{
+  position:fixed;
+  top:10px;
+  left:10px;
+  padding:10px 15px;
+  background:#00e5ff;
+  color:#000;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:1000;
+}
+
+/* CONTROLS TOP CENTER */
+.controls{
+  position:fixed;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+  background:rgba(0,0,0,0.3);
+  padding:10px;
+  border-radius:10px;
+}
+
+input,button{
+  padding:8px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
+}
+
+/* SCENE */
+.scene{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  perspective:1200px;
+}
+
+/* STACK CONTAINER */
+.stack{
+  display:flex;
+  flex-direction:column-reverse; /* stack effect */
+  gap:15px;
+}
+
+/* ITEM WRAPPER */
+.item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+
+/* CUBE */
+.cube{
+  width:75px;
+  height:75px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:0.3s;
+}
+
+/* SEARCH HIGHLIGHT */
+.cube.active{
+  transform:scale(1.2);
+  filter:drop-shadow(0 0 12px yellow);
+}
+
+/* FACES */
+.face{
+  position:absolute;
+  width:75px;
+  height:75px;
+  background:rgba(0,229,255,0.85);
+  border:1px solid #fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+}
+
+.front{transform:translateZ(37.5px);}
+.back{transform:rotateY(180deg) translateZ(37.5px);}
+.left{transform:rotateY(-90deg) translateZ(37.5px);}
+.right{transform:rotateY(90deg) translateZ(37.5px);}
+.top{transform:rotateX(90deg) translateZ(37.5px);}
+.bottom{transform:rotateX(-90deg) translateZ(37.5px);}
+
+/* INDEX BOX */
+.index-box{
+  margin-top:6px;
+  background:#000;
+  color:#00e5ff;
+  font-size:12px;
+  padding:3px 8px;
+  border:1px solid #00e5ff;
+  border-radius:6px;
+}
+
+</style>
+</head>
+
+<body>
+
+<button id="backBtn" onclick="goBack()">Back to Linear</button>
+
+<h1>📚 STACK OPERATIONS VISUALIZER 📚</h1>
+
+<div class="controls">
+  <input type="number" id="value" placeholder="Enter value">
+  <button onclick="push()">Push</button>
+  <button onclick="pop()">Pop</button>
+  <button onclick="peek()">Peek</button>
+  <button onclick="searchVal()">Search</button>
+</div>
+
+<div class="scene">
+  <div class="stack" id="stack"></div>
+</div>
+
+<script>
+let stack = [];
+
+function render(){
+  const s = document.getElementById("stack");
+  s.innerHTML = "";
+
+  stack.forEach((v,i)=>{
+    const item = document.createElement("div");
+    item.className = "item";
+
+    item.innerHTML = `
+      <div class="cube">
+        <div class="face front">${v}</div>
+        <div class="face back">${v}</div>
+        <div class="face left">${v}</div>
+        <div class="face right">${v}</div>
+        <div class="face top">${v}</div>
+        <div class="face bottom">${v}</div>
+      </div>
+      <div class="index-box">Index: ${i}</div>
+    `;
+
+    s.appendChild(item);
+  });
+}
+
+/* STACK OPS */
+function push(){
+  let v = document.getElementById("value").value;
+  if(v==="") return;
+  stack.push(v);
+  render();
+}
+
+function pop(){
+  stack.pop();
+  render();
+}
+
+function peek(){
+  if(stack.length>0){
+    alert("Top: " + stack[stack.length-1]);
+  }
+}
+
+function searchVal(){
+  let v = document.getElementById("value").value;
+
+  document.querySelectorAll(".cube").forEach(c=>{
+    c.classList.remove("active");
+  });
+
+  stack.forEach((val,i)=>{
+    if(val == v){
+      document.querySelectorAll(".cube")[i].classList.add("active");
+    }
+  });
+}
+
+function goBack(){
+  window.location.href = "linear.html";
+}
+
+render();
+</script>
+
+</body>
+</html>

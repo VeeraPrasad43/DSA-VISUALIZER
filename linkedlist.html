@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Linked List Visualizer</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  overflow:hidden;
+  background: radial-gradient(circle at top,#0f2027,#203a43,#2c5364);
+  color:white;
+}
+
+h1{
+  text-align:center;
+  margin:10px 0;
+  color:#00e5ff;
+}
+
+/* BACK BUTTON */
+#backBtn{
+  position:fixed;
+  top:10px;
+  left:10px;
+  padding:10px 15px;
+  background:#00e5ff;
+  color:#000;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  z-index:1000;
+}
+
+/* CONTROLS */
+.controls{
+  position:fixed;
+  top:60px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+  background:rgba(0,0,0,0.3);
+  padding:10px;
+  border-radius:10px;
+}
+
+input,button{
+  padding:8px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
+}
+
+/* SCENE */
+.scene{
+  width:100vw;
+  height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  perspective:1200px;
+}
+
+/* LIST */
+.list{
+  display:flex;
+  align-items:center;
+  gap:25px;
+}
+
+/* NODE WRAPPER */
+.node-wrap{
+  display:flex;
+  align-items:center;
+  animation:pop 0.4s ease;
+}
+
+/* POP ANIMATION */
+@keyframes pop{
+  from{transform:scale(0);}
+  to{transform:scale(1);}
+}
+
+/* NODE */
+.node{
+  width:80px;
+  height:80px;
+  position:relative;
+  transform-style:preserve-3d;
+  transition:0.3s;
+}
+
+/* SEARCH HIGHLIGHT */
+.node.active{
+  transform:scale(1.2);
+  filter:drop-shadow(0 0 12px yellow);
+}
+
+/* FACES */
+.face{
+  position:absolute;
+  width:80px;
+  height:80px;
+  background:rgba(0,229,255,0.85);
+  border:1px solid #fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  font-weight:bold;
+}
+
+.front{transform:translateZ(40px);}
+.back{transform:rotateY(180deg) translateZ(40px);}
+.left{transform:rotateY(-90deg) translateZ(40px);}
+.right{transform:rotateY(90deg) translateZ(40px);}
+.top{transform:rotateX(90deg) translateZ(40px);}
+.bottom{transform:rotateX(-90deg) translateZ(40px);}
+
+/* ARROW */
+.arrow{
+  font-size:30px;
+  color:#00e5ff;
+  animation:blink 1s infinite;
+}
+
+@keyframes blink{
+  0%,100%{opacity:1;}
+  50%{opacity:0.3;}
+}
+
+</style>
+</head>
+
+<body>
+
+<button id="backBtn" onclick="goBack()">Back to Linear</button>
+
+<h1>LINKED LIST VISUALIZER</h1>
+
+<div class="controls">
+  <input type="number" id="value" placeholder="Enter value">
+  <button onclick="insert()">Insert</button>
+  <button onclick="deleteVal()">Delete</button>
+  <button onclick="searchVal()">Search</button>
+</div>
+
+<div class="scene">
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+let list = [];
+
+function render(){
+  const l = document.getElementById("list");
+  l.innerHTML = "";
+
+  list.forEach((v,i)=>{
+    const wrap = document.createElement("div");
+    wrap.className = "node-wrap";
+
+    wrap.innerHTML = `
+      <div class="node">
+        <div class="face front">${v}</div>
+        <div class="face back">${v}</div>
+        <div class="face left">${v}</div>
+        <div class="face right">${v}</div>
+        <div class="face top">${v}</div>
+        <div class="face bottom">${v}</div>
+      </div>
+      ${i < list.length - 1 ? '<div class="arrow">➜</div>' : ''}
+    `;
+
+    l.appendChild(wrap);
+  });
+}
+
+/* INSERT */
+function insert(){
+  let v = document.getElementById("value").value;
+  if(v==="") return;
+  list.push(v);
+  render();
+}
+
+/* DELETE */
+function deleteVal(){
+  let v = document.getElementById("value").value;
+  list = list.filter(x => x != v);
+  render();
+}
+
+/* SEARCH */
+function searchVal(){
+  let v = document.getElementById("value").value;
+
+  document.querySelectorAll(".node").forEach(n=>{
+    n.classList.remove("active");
+  });
+
+  list.forEach((val,i)=>{
+    if(val == v){
+      document.querySelectorAll(".node")[i].classList.add("active");
+    }
+  });
+}
+
+/* BACK */
+function goBack(){
+  window.location.href = "linear.html";
+}
+
+render();
+</script>
+
+</body>
+</html>

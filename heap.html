@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Heap Visualizer</title>
+
+<style>
+/* RESET */
+body{
+margin:0;
+font-family:Arial;
+color:white;
+overflow:hidden;
+background:black;
+}
+
+/* 🌌 BACKGROUND FIX */
+.bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+z-index:-3;
+background:linear-gradient(-45deg,#0f0c29,#302b63,#24243e,#000);
+background-size:400% 400%;
+animation:bgMove 12s ease infinite;
+}
+
+@keyframes bgMove{
+0%{background-position:0% 50%;}
+50%{background-position:100% 50%;}
+100%{background-position:0% 50%;}
+}
+
+/* floating glow dots */
+.dot{
+position:absolute;
+width:6px;
+height:6px;
+background:cyan;
+border-radius:50%;
+animation:float 8s linear infinite;
+opacity:0.6;
+z-index:-2;
+}
+
+@keyframes float{
+0%{transform:translateY(100vh);}
+100%{transform:translateY(-10vh);}
+}
+
+/* TITLE */
+h1{
+text-align:center;
+color:cyan;
+text-shadow:0 0 12px cyan;
+margin-top:20px;
+}
+
+/* BACK BUTTON */
+.back{
+position:absolute;
+top:10px;
+left:10px;
+background:red;
+padding:8px 12px;
+color:white;
+border-radius:8px;
+text-decoration:none;
+z-index:10;
+}
+
+/* CONTROLS */
+.panel{
+display:flex;
+justify-content:center;
+gap:10px;
+flex-wrap:wrap;
+margin:20px;
+}
+
+input{
+padding:10px;
+border:none;
+border-radius:8px;
+}
+
+button{
+padding:10px 15px;
+border:none;
+border-radius:8px;
+background:cyan;
+cursor:pointer;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.05);
+}
+
+/* TREE CENTER FIX */
+.container{
+position:relative;
+height:450px;
+display:flex;
+justify-content:center;
+align-items:flex-start;
+}
+
+/* SVG lines */
+#lines{
+position:absolute;
+width:100%;
+height:100%;
+z-index:0;
+}
+
+/* nodes */
+#nodes{
+position:absolute;
+width:100%;
+height:100%;
+z-index:1;
+}
+
+/* node style */
+.node{
+position:absolute;
+width:45px;
+height:45px;
+border-radius:50%;
+background:cyan;
+color:black;
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:bold;
+box-shadow:0 0 12px cyan;
+transition:0.4s;
+}
+
+/* array */
+.arrayBox{
+text-align:center;
+margin-top:20px;
+z-index:2;
+position:relative;
+}
+
+.arrayItem{
+display:inline-block;
+padding:10px;
+margin:5px;
+background:#222;
+border:1px solid cyan;
+border-radius:5px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- 🌌 BACKGROUND -->
+<div class="bg"></div>
+
+<script>
+for(let i=0;i<30;i++){
+let d=document.createElement("div");
+d.className="dot";
+d.style.left=Math.random()*100+"%";
+d.style.animationDuration=(4+Math.random()*5)+"s";
+document.body.appendChild(d);
+}
+</script>
+
+<a class="back" href="nonlinear.html">⬅ Back</a>
+
+<h1>🌳 HEAP VISUALIZER</h1>
+
+<div class="panel">
+<input id="val" type="number" placeholder="Enter value">
+<button onclick="insert()">Insert</button>
+<button onclick="deleteRoot()">Delete Root</button>
+<button onclick="heapify()">Heapify</button>
+<button onclick="clearHeap()">Clear</button>
+</div>
+
+<div class="container">
+<svg id="lines"></svg>
+<div id="nodes"></div>
+</div>
+
+<div class="arrayBox">
+<h3>Heap Array</h3>
+<div id="array"></div>
+</div>
+
+<script>
+let heap=[];
+
+/* INSERT */
+function insert(){
+let v=parseInt(document.getElementById("val").value);
+if(isNaN(v)) return;
+
+heap.push(v);
+up(heap.length-1);
+render();
+}
+
+/* UP */
+function up(i){
+while(i>0){
+let p=Math.floor((i-1)/2);
+if(heap[p]<heap[i]){
+[heap[p],heap[i]]=[heap[i],heap[p]];
+i=p;
+}else break;
+}
+}
+
+/* DELETE ROOT */
+function deleteRoot(){
+if(heap.length===0) return;
+
+if(heap.length===1){
+heap=[];
+render();
+return;
+}
+
+heap[0]=heap.pop();
+down(0);
+render();
+}
+
+/* DOWN */
+function down(i){
+while(true){
+let l=2*i+1;
+let r=2*i+2;
+let largest=i;
+
+if(l<heap.length && heap[l]>heap[largest]) largest=l;
+if(r<heap.length && heap[r]>heap[largest]) largest=r;
+
+if(largest!=i){
+[heap[i],heap[largest]]=[heap[largest],heap[i]];
+i=largest;
+}else break;
+}
+}
+
+/* HEAPIFY */
+function heapify(){
+for(let i=Math.floor(heap.length/2);i>=0;i--){
+down(i);
+}
+render();
+}
+
+/* CLEAR */
+function clearHeap(){
+heap=[];
+render();
+}
+
+/* RENDER */
+function render(){
+document.getElementById("array").innerHTML=
+heap.map(x=>`<span class="arrayItem">${x}</span>`).join("");
+draw();
+}
+
+/* DRAW CENTERED */
+function draw(){
+let nodes=document.getElementById("nodes");
+let svg=document.getElementById("lines");
+
+nodes.innerHTML="";
+svg.innerHTML="";
+
+let baseX = window.innerWidth/2;
+
+heap.forEach((v,i)=>{
+
+let level=Math.floor(Math.log2(i+1));
+let start=Math.pow(2,level)-1;
+let pos=i-start;
+
+let spacing=160/Math.pow(2,level);
+
+let x=baseX + (pos - Math.pow(2,level)/2)*spacing;
+let y=70 + level*95;
+
+let node=document.createElement("div");
+node.className="node";
+node.style.left=x+"px";
+node.style.top=y+"px";
+node.innerText=v;
+
+nodes.appendChild(node);
+
+if(i>0){
+let p=Math.floor((i-1)/2);
+
+let pl=Math.floor(Math.log2(p+1));
+let ps=Math.pow(2,pl)-1;
+let pp=p-ps;
+
+let px=baseX + (pp - Math.pow(2,pl)/2)*(160/Math.pow(2,pl));
+let py=70 + pl*95;
+
+let line=document.createElementNS("http://www.w3.org/2000/svg","line");
+
+line.setAttribute("x1",px+22);
+line.setAttribute("y1",py+22);
+line.setAttribute("x2",x+22);
+line.setAttribute("y2",y+22);
+
+line.setAttribute("stroke","cyan");
+
+svg.appendChild(line);
+}
+});
+}
+</script>
+
+</body>
+</html>

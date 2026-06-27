@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>3D Graph Visualizer</title>
+
+<style>
+
+body{
+margin:0;
+overflow:hidden;
+font-family:Arial;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+color:white;
+text-align:center;
+}
+
+/* 3D Background */
+
+.bg{
+position:fixed;
+width:100%;
+height:100%;
+z-index:-1;
+overflow:hidden;
+}
+
+.cube{
+position:absolute;
+width:60px;
+height:60px;
+border:2px solid cyan;
+animation:spin 10s linear infinite;
+opacity:.4;
+}
+
+.c1{top:10%;left:15%;}
+.c2{top:60%;left:30%;}
+.c3{top:20%;left:70%;}
+.c4{top:75%;left:80%;}
+
+@keyframes spin{
+
+0%{transform:rotateX(0) rotateY(0);}
+100%{transform:rotateX(360deg) rotateY(360deg);}
+
+}
+
+.panel{
+margin-top:20px;
+}
+
+input{
+padding:8px;
+margin:5px;
+width:80px;
+}
+
+button{
+padding:10px;
+margin:5px;
+background:cyan;
+border:none;
+border-radius:8px;
+cursor:pointer;
+}
+
+canvas{
+background:white;
+margin-top:20px;
+border-radius:15px;
+}
+
+.back{
+position:absolute;
+top:20px;
+left:20px;
+text-decoration:none;
+background:cyan;
+padding:10px 15px;
+border-radius:8px;
+color:black;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="bg">
+<div class="cube c1"></div>
+<div class="cube c2"></div>
+<div class="cube c3"></div>
+<div class="cube c4"></div>
+</div>
+
+<a href="nonlinear.html" class="back">⬅ Back</a>
+
+<h1>GRAPH VISUALIZER</h1>
+
+<div class="panel">
+
+<input id="vertex" placeholder="Vertex">
+
+<button onclick="addVertex()">Add Vertex</button>
+
+<br>
+
+<input id="from" placeholder="From">
+
+<input id="to" placeholder="To">
+
+<button onclick="addEdge()">Add Edge</button>
+
+</div>
+
+<canvas id="graph" width="900" height="500"></canvas>
+
+<script>
+
+let canvas=document.getElementById("graph");
+let ctx=canvas.getContext("2d");
+
+let vertices=[];
+let edges=[];
+
+function draw(){
+
+ctx.clearRect(0,0,900,500);
+
+edges.forEach(e=>{
+
+let a=vertices.find(v=>v.name==e.from);
+let b=vertices.find(v=>v.name==e.to);
+
+if(a&&b){
+
+ctx.beginPath();
+
+ctx.moveTo(a.x,a.y);
+
+ctx.lineTo(b.x,b.y);
+
+ctx.strokeStyle="black";
+
+ctx.lineWidth=3;
+
+ctx.stroke();
+
+}
+
+});
+
+vertices.forEach(v=>{
+
+
+
+ctx.beginPath();
+
+ctx.arc(v.x,v.y,25,0,Math.PI*2);
+
+ctx.fillStyle="#00bcd4";
+
+ctx.fill();
+
+ctx.stroke();
+
+ctx.fillStyle="white";
+
+ctx.font="18px Arial";
+
+ctx.fillText(v.name,v.x-6,v.y+6);
+
+});
+
+}
+
+function addVertex(){
+
+let name = document.getElementById("vertex").value;
+
+if(name=="") return;
+
+let angle = (2 * Math.PI * vertices.length) / 12;
+
+let radius = 180;
+
+let centerX = 450;
+let centerY = 250;
+
+let x = centerX + radius * Math.cos(angle);
+let y = centerY + radius * Math.sin(angle);
+
+vertices.push({
+    name:name,
+    x:x,
+    y:y
+});
+
+document.getElementById("vertex").value="";
+
+draw();
+
+}
+
+
+
+function addEdge(){
+
+let from=document.getElementById("from").value;
+
+let to=document.getElementById("to").value;
+
+edges.push({from,to});
+
+document.getElementById("from").value="";
+
+document.getElementById("to").value="";
+
+draw();
+
+}
+
+</script>
+
+</body>
+</html>
